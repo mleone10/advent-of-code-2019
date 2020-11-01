@@ -5,20 +5,27 @@ import (
 	"log"
 	"math"
 	"os"
+	"sort"
 	"strings"
+
+	aoc "github.com/mleone10/advent-of-code-2019"
 )
 
 type location struct {
 	x, y int
+	r    float64
 }
 
-type view map[float64]interface{}
+type view map[float64][]location
 
 func main() {
 	ls := readInput()
 	l, v := locateStation(ls)
 
 	log.Printf("Best location for station is at (%d,%d) with view to %d asteroids", l.x, l.y, len(v))
+
+	a := v.findNthDestroyed(200)
+	log.Printf("200th asteroid to be destroyed is at (%d,%d), whose hash is %d", a.x, a.y, a.x*100+a.y)
 }
 
 func readInput() []location {
@@ -57,7 +64,47 @@ func computeStationView(s location, ls []location) view {
 	v := view{}
 	for _, l := range ls {
 		x, y := l.x-s.x, l.y-s.y
-		v[math.Atan2(float64(y), float64(x))] = struct{}{}
+		a := aoc.Bearing(x, y)
+		l.setDistance(x, y)
+		if l.r > 0 {
+			v[a] = append(v[a], l)
+		}
 	}
+
+	for _, a := range v {
+		sort.Slice(a, func(i, j int) bool {
+			return ls[i].r < ls[j].r
+		})
+	}
+
 	return v
+}
+
+func (v view) findNthDestroyed(n int) location {
+	var l location
+	for _, a := range angles(v) {
+		l = v[a][0]
+		v[a] = v[a][1:]
+		if len(v[a]) == 0 {
+			delete(v, a)
+		}
+		n--
+		if n <= 0 {
+			break
+		}
+	}
+	return l
+}
+
+func angles(v view) []float64 {
+	as := []float64{}
+	for a := range v {
+		as = append(as, a)
+	}
+	sort.Float64s(as)
+	return as
+}
+
+func (l *location) setDistance(x, y int) {
+	l.r = math.Sqrt(float64(x*x + y*y))
 }
