@@ -9,14 +9,15 @@ import (
 
 type asteroid struct {
 	x, y int     // Positive cartesian coordinates from an origin in the top-left of the field
-	d, t float64 // Polar coordinates from the monitoring station
+	d, a float64 // Polar coordinates from the monitoring station
+	view map[float64][]asteroid
 }
 
 func main() {
 	as := readInput()
-	stationIndex := locateStation(as)
+	a := locateStation(as)
 
-	log.Printf("Best location for station is at (%d,%d)", as[stationIndex].x, as[stationIndex].y)
+	log.Printf("Best location for station is at (%d,%d)", a.x, a.y)
 }
 
 func readInput() []asteroid {
@@ -38,17 +39,31 @@ func readInput() []asteroid {
 	return as
 }
 
-func locateStation(as []asteroid) int {
-	var optimalIndex, optimalScore int
+func locateStation(as []asteroid) asteroid {
 	for i, a := range as {
-		s := calculateScore(a, as)
+		a.view = constructView(i, as)
+	}
+
+	var optimalAsteroid asteroid
+	var optimalScore int
+	for _, a := range as {
+		s := len(a.view)
 		if s > optimalScore {
-			optimalIndex = i
+			optimalAsteroid = a
 		}
 	}
-	return optimalIndex
+	return optimalAsteroid
 }
 
-func calculateScore(a asteroid, as []asteroid) int {
-	return 0
+func constructView(originIndex int, as []asteroid) map[float64][]asteroid {
+	view := map[float64][]asteroid{}
+	originAsteroid := as[originIndex]
+
+	for i, a := range as {
+		if i != originIndex {
+
+		}
+	}
+
+	return view
 }
