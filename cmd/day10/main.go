@@ -19,9 +19,7 @@ type location struct {
 type view map[float64][]location
 
 func main() {
-	ls := readInput()
-	l, v := locateStation(ls)
-
+	l, v := locateStation(readInput())
 	log.Printf("Best location for station is at (%d,%d) with view to %d asteroids", l.x, l.y, len(v))
 
 	a := v.findNthDestroyed(200)
@@ -65,7 +63,7 @@ func computeStationView(s location, ls []location) view {
 	for _, l := range ls {
 		x, y := l.x-s.x, l.y-s.y
 		a := aoc.Bearing(x, y)
-		l.setDistance(x, y)
+		l.r = math.Hypot(float64(x), float64(y))
 		if l.r > 0 {
 			v[a] = append(v[a], l)
 		}
@@ -73,7 +71,7 @@ func computeStationView(s location, ls []location) view {
 
 	for _, a := range v {
 		sort.Slice(a, func(i, j int) bool {
-			return ls[i].r < ls[j].r
+			return a[i].r < a[j].r
 		})
 	}
 
@@ -83,8 +81,7 @@ func computeStationView(s location, ls []location) view {
 func (v view) findNthDestroyed(n int) location {
 	var l location
 	for _, a := range angles(v) {
-		l = v[a][0]
-		v[a] = v[a][1:]
+		l, v[a] = v[a][0], v[a][1:]
 		if len(v[a]) == 0 {
 			delete(v, a)
 		}
@@ -103,8 +100,4 @@ func angles(v view) []float64 {
 	}
 	sort.Float64s(as)
 	return as
-}
-
-func (l *location) setDistance(x, y int) {
-	l.r = math.Sqrt(float64(x*x + y*y))
 }
