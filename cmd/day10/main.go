@@ -3,25 +3,26 @@ package main
 import (
 	"bufio"
 	"log"
+	"math"
 	"os"
 	"strings"
 )
 
-type asteroid struct {
-	x, y int     // Positive cartesian coordinates from an origin in the top-left of the field
-	d, a float64 // Polar coordinates from the monitoring station
-	view map[float64][]asteroid
+type location struct {
+	x, y int
 }
+
+type view map[float64]interface{}
 
 func main() {
-	as := readInput()
-	a := locateStation(as)
+	ls := readInput()
+	l, v := locateStation(ls)
 
-	log.Printf("Best location for station is at (%d,%d)", a.x, a.y)
+	log.Printf("Best location for station is at (%d,%d) with view to %d asteroids", l.x, l.y, len(v))
 }
 
-func readInput() []asteroid {
-	as := []asteroid{}
+func readInput() []location {
+	ls := []location{}
 
 	scanner := bufio.NewScanner(os.Stdin)
 	y := 0
@@ -29,41 +30,34 @@ func readInput() []asteroid {
 		x := 0
 		for _, l := range strings.Split(scanner.Text(), "") {
 			if l == "#" {
-				as = append(as, asteroid{x: x, y: y})
+				ls = append(ls, location{x: x, y: y})
 			}
 			x++
 		}
 		y++
 	}
 
-	return as
+	return ls
 }
 
-func locateStation(as []asteroid) asteroid {
-	for i, a := range as {
-		a.view = constructView(i, as)
-	}
-
-	var optimalAsteroid asteroid
-	var optimalScore int
-	for _, a := range as {
-		s := len(a.view)
-		if s > optimalScore {
-			optimalAsteroid = a
+func locateStation(ls []location) (location, view) {
+	var optLoc location
+	var optView view
+	for _, l := range ls {
+		v := computeStationView(l, ls)
+		if len(v) > len(optView) {
+			optView = v
+			optLoc = l
 		}
 	}
-	return optimalAsteroid
+	return optLoc, optView
 }
 
-func constructView(originIndex int, as []asteroid) map[float64][]asteroid {
-	view := map[float64][]asteroid{}
-	originAsteroid := as[originIndex]
-
-	for i, a := range as {
-		if i != originIndex {
-
-		}
+func computeStationView(s location, ls []location) view {
+	v := view{}
+	for _, l := range ls {
+		x, y := l.x-s.x, l.y-s.y
+		v[math.Atan2(float64(y), float64(x))] = struct{}{}
 	}
-
-	return view
+	return v
 }
