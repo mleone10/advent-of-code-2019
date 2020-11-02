@@ -9,7 +9,7 @@ import (
 const n = 1000
 
 type system struct {
-	ms []moon
+	ms, init []moon
 }
 
 type moon struct {
@@ -21,20 +21,39 @@ type vector struct {
 }
 
 func main() {
-	s := system{
-		ms: []moon{
-			moon{vector{0, 6, 1}, vector{}},
-			moon{vector{4, 4, 19}, vector{}},
-			moon{vector{-11, 1, 8}, vector{}},
-			moon{vector{2, 19, 15}, vector{}},
-		},
-	}
+	s := newSystem([]vector{
+		vector{0, 6, 1},
+		vector{4, 4, 19},
+		vector{-11, 1, 8},
+		vector{2, 19, 15},
+	})
 
 	for i := 0; i < n; i++ {
 		s.step()
 	}
 
 	log.Printf("Total energy after %d steps: %d", n, s.getEnergy())
+}
+
+func newSystem(initPs []vector) system {
+	ms := []moon{}
+	initMs := []moon{}
+	for _, p := range initPs {
+		m := moon{p, vector{}}
+		ms = append(ms, m)
+		initMs = append(initMs, m)
+	}
+
+	return system{
+		ms:   ms,
+		init: initMs,
+	}
+}
+
+func (s *system) reset() {
+	for i, m := range s.init {
+		s.ms[i] = m
+	}
 }
 
 func (s *system) step() {
