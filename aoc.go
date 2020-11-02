@@ -7,3 +7,24 @@ import "math"
 func Bearing(x, y int) float64 {
 	return math.Mod(360-math.Atan2(float64(-x), float64(-y))*(180/math.Pi), 360)
 }
+
+func Max(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
+}
+
+func Min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+
+func Abs(x int) int {
+	if x < 0 {
+		return -1 * x
+	}
+	return x
+}
