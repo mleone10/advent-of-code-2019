@@ -34,7 +34,18 @@ func main() {
 }
 
 func (s system) step() {
+	s.applyGravity()
+	s.applyVelocity()
+}
 
+func (s system) applyGravity() {
+
+}
+
+func (s system) applyVelocity() {
+	for _, m := range s.ms {
+		m.applyVelocity()
+	}
 }
 
 func (s system) getEnergy() int {
@@ -43,6 +54,10 @@ func (s system) getEnergy() int {
 		sum += m.getEnergy()
 	}
 	return sum
+}
+
+func (m moon) applyVelocity() {
+	m.pos.add(m.vel)
 }
 
 func (m moon) getEnergy() int {
@@ -55,6 +70,12 @@ func (m moon) getPotentialEnergy() int {
 
 func (m moon) getKineticEnergy() int {
 	return m.vel.sum()
+}
+
+func (v vector) add(r vector) {
+	v.x += r.x
+	v.y += r.y
+	v.z += r.z
 }
 
 func (v vector) sum() int {
