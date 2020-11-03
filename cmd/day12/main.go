@@ -6,7 +6,12 @@ import (
 	aoc "github.com/mleone10/advent-of-code-2019"
 )
 
-const n = 1000
+const (
+	n    = 10
+	dimX = iota
+	dimY
+	dimZ
+)
 
 type system struct {
 	ms, init []moon
@@ -33,6 +38,8 @@ func main() {
 	}
 
 	log.Printf("Total energy after %d steps: %d", n, s.getEnergy())
+
+	log.Printf("System-wide period: %d", s.getPeriod())
 }
 
 func newSystem(initPs []vector) system {
@@ -61,6 +68,36 @@ func (s *system) step() {
 	s.applyVelocity()
 }
 
+func (s *system) getPeriod() int {
+	s.reset()
+
+	periods := [3]int{}
+	done := [3]bool{}
+	for !done[0] || !done[1] || !done[2] {
+		s.step()
+		for p := range periods {
+			if !done[p] {
+				equal := true
+				for m := range s.ms {
+					if !s.ms[m].equal(s.init[m], p) {
+						equal = false
+					}
+				}
+				if equal {
+					done[p] = true
+				} else {
+					periods[p]++
+				}
+			}
+		}
+	}
+	for i := range periods {
+		periods[i]++
+	}
+
+	return aoc.Lcm(aoc.Lcm(periods[0], periods[1]), periods[2])
+}
+
 func (s *system) applyGravity() {
 	for i := range s.ms {
 		for j, n := range s.ms {
@@ -84,6 +121,16 @@ func (s *system) getEnergy() int {
 		sum += m.getEnergy()
 	}
 	return sum
+}
+
+func (m *moon) equal(n moon, p int) bool {
+	if p == dimX {
+		return m.pos.x == n.pos.x && m.vel.x == n.vel.x
+	} else if p == dimY {
+		return m.pos.y == n.pos.y && m.vel.y == n.vel.y
+	} else {
+		return m.pos.z == n.pos.z && m.vel.z == n.vel.z
+	}
 }
 
 func (m *moon) applyGravity(n moon) {

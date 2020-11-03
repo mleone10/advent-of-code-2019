@@ -31,3 +31,16 @@ func Abs(x int) int {
 	}
 	return x
 }
+
+// Lcm returns the least common multiple of two integers
+func Lcm(x, y int) int {
+	return x * y / Gcd(x, y)
+}
+
+// Gcd returns the greatest common denominator of two integers
+func Gcd(x, y int) int {
+	for y != 0 {
+		x, y = y, x%y
+	}
+	return x
+}
