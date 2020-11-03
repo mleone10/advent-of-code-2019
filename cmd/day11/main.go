@@ -49,15 +49,14 @@ func main() {
 
 func run(prog []int, initColor int) grid {
 	in := make(chan int, 1)
-	out := make(chan int, 2)
-	halt := make(chan interface{}, 1)
-	p := aoc.NewProgram(prog, in, out, halt)
+	out := make(chan int)
+	p := aoc.NewProgram(prog, in, out)
 
 	go p.Run()
-	return interact(in, out, halt, initColor)
+	return interact(in, out, initColor)
 }
 
-func interact(in chan<- int, out <-chan int, halt <-chan interface{}, initColor int) grid {
+func interact(in chan<- int, out <-chan int, initColor int) grid {
 	grid := grid{map[location]int{}, 1, 1, 0, 0}
 	var l location
 	var dir direction
@@ -65,23 +64,10 @@ func interact(in chan<- int, out <-chan int, halt <-chan interface{}, initColor 
 	minX, minY := math.MaxInt64, math.MaxInt64
 
 	grid.ls[l] = initColor
+	in <- initColor
 
-	for {
-		if len(halt) != 0 {
-			grid.h = aoc.Abs(maxY - minY)
-			grid.w = aoc.Abs(maxX - minX)
-			grid.minX = minX
-			grid.minY = minY
-			return grid
-		}
-
-		if grid.ls[l] == 0 {
-			in <- 0
-		} else {
-			in <- 1
-		}
-
-		grid.ls[l] = <-out
+	for color := range out {
+		grid.ls[l] = color
 
 		rotation := <-out
 		if rotation == 0 {
@@ -107,7 +93,20 @@ func interact(in chan<- int, out <-chan int, halt <-chan interface{}, initColor 
 		minY = aoc.Min(minY, l.y)
 		maxX = aoc.Max(maxX, l.x)
 		maxY = aoc.Max(maxY, l.y)
+
+		if grid.ls[l] == 0 {
+			in <- 0
+		} else {
+			in <- 1
+		}
 	}
+
+	grid.h = aoc.Abs(maxY - minY)
+	grid.w = aoc.Abs(maxX - minX)
+	grid.minX = minX
+	grid.minY = minY
+
+	return grid
 }
 
 func displayGrid(g grid) {

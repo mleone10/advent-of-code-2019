@@ -11,7 +11,6 @@ type Program struct {
 	pc, op, ro int
 	Input      <-chan int
 	Output     chan<- int
-	Halt       chan<- interface{}
 }
 
 type operation struct {
@@ -20,7 +19,7 @@ type operation struct {
 }
 
 // NewProgram constructs a Program with the given initial state and input, output, and halt channels
-func NewProgram(init []int, in <-chan int, out chan<- int, halt chan<- interface{}) *Program {
+func NewProgram(init []int, in <-chan int, out chan<- int) *Program {
 	state := map[int]int{}
 	for i, v := range init {
 		state[i] = v
@@ -30,7 +29,6 @@ func NewProgram(init []int, in <-chan int, out chan<- int, halt chan<- interface
 		state:  state,
 		Input:  in,
 		Output: out,
-		Halt:   halt,
 	}
 }
 
@@ -102,7 +100,7 @@ func (p *Program) Run() {
 			p.pc += 2
 		case 99:
 			// Halt
-			p.Halt <- struct{}{}
+			close(p.Output)
 			return
 		default:
 			log.Fatalf("encountered unknown opcode; %+v", p)

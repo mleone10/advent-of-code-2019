@@ -20,12 +20,10 @@ func TestBoost(t *testing.T) {
 
 	in := make(chan int)
 	out := make(chan int, 1)
-	halt := make(chan interface{})
 
-	p := aoc.NewProgram(init, in, out, halt)
+	p := aoc.NewProgram(init, in, out)
 	go p.Run()
 	in <- 1
-	<-halt
 
 	actual := <-out
 	expected := 2714716640
@@ -37,9 +35,8 @@ func TestBoost(t *testing.T) {
 func TestInOut(t *testing.T) {
 	in := make(chan int)
 	out := make(chan int)
-	halt := make(chan interface{})
 
-	p := aoc.NewProgram([]int{3, 3, 104, -1, 99}, in, out, halt)
+	p := aoc.NewProgram([]int{3, 3, 104, -1, 99}, in, out)
 
 	want := 12345
 
@@ -55,9 +52,8 @@ func TestInOut(t *testing.T) {
 func TestRelativeOffset(t *testing.T) {
 	in := make(chan int)
 	out := make(chan int)
-	halt := make(chan interface{})
 
-	p := aoc.NewProgram([]int{109, -2, 204, 7, 99, 111}, in, out, halt)
+	p := aoc.NewProgram([]int{109, -2, 204, 7, 99, 111}, in, out)
 
 	go p.Run()
 
@@ -72,18 +68,16 @@ func TestRelativeOffset(t *testing.T) {
 func TestBigMemory(t *testing.T) {
 	in := make(chan int)
 	out := make(chan int, 20)
-	halt := make(chan interface{})
 
 	got := []int{}
 	want := []int{109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99}
 
-	p := aoc.NewProgram([]int{109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99}, in, out, halt)
+	p := aoc.NewProgram([]int{109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99}, in, out)
 
 	go p.Run()
-	<-halt
 
-	for len(out) > 0 {
-		got = append(got, <-out)
+	for o := range out {
+		got = append(got, o)
 	}
 
 	if len(got) != len(want) {
@@ -100,13 +94,11 @@ func TestBigMemory(t *testing.T) {
 func TestBigValues(t *testing.T) {
 	in := make(chan int)
 	out := make(chan int, 1)
-	halt := make(chan interface{})
 	want := 1219070632396864
 
-	p := aoc.NewProgram([]int{1102, 34915192, 34915192, 7, 4, 7, 99, 0}, in, out, halt)
+	p := aoc.NewProgram([]int{1102, 34915192, 34915192, 7, 4, 7, 99, 0}, in, out)
 
 	go p.Run()
-	<-halt
 
 	got := <-out
 
