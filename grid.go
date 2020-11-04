@@ -2,25 +2,27 @@ package aoc
 
 import (
 	"fmt"
+	"strconv"
 )
 
 // Grid represents a two dimensional array of integers.
 type Grid struct {
-	field                  map[coordinate]int
+	field                  map[Coordinate]int
 	minX, minY, maxX, maxY int
 }
 
-type coordinate struct {
-	x, y int
+// Coordinate represents a two-dimensional (x,y) position on the grid.
+type Coordinate struct {
+	X, Y int
 }
 
 // Set stores integer i at location (x, y)
 func (g *Grid) Set(x, y, i int) {
 	if g.field == nil {
-		g.field = map[coordinate]int{}
+		g.field = map[Coordinate]int{}
 	}
 
-	g.field[coordinate{x, y}] = i
+	g.field[Coordinate{x, y}] = i
 	g.minX = Min(g.minX, x)
 	g.minY = Min(g.minY, y)
 	g.maxX = Max(g.maxX, x)
@@ -29,7 +31,7 @@ func (g *Grid) Set(x, y, i int) {
 
 // Get retrieves the value located at (x, y)
 func (g Grid) Get(x, y int) int {
-	return g.field[coordinate{x, y}]
+	return g.field[Coordinate{x, y}]
 }
 
 // Len returns the total number of locations stored in the grid
@@ -51,9 +53,7 @@ func (g Grid) Print() {
 	}
 
 	for l, c := range g.field {
-		if c == 1 {
-			output[l.y+Abs(g.minY)][l.x+Abs(g.minX)] = "#"
-		}
+		output[l.Y+Abs(g.minY)][l.X+Abs(g.minX)] = strconv.Itoa(c)
 	}
 
 	for i := range output {
