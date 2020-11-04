@@ -46,6 +46,7 @@ func interact(in chan<- int, out <-chan int, initColor int) aoc.Grid {
 	var dir direction
 	var x, y int
 
+	grid.Mapper = mappingFunc
 	grid.Set(0, 0, initColor)
 	in <- initColor
 
@@ -80,4 +81,11 @@ func interact(in chan<- int, out <-chan int, initColor int) aoc.Grid {
 	}
 
 	return grid
+}
+
+func mappingFunc(i int) string {
+	if i == 1 {
+		return "#"
+	}
+	return " "
 }

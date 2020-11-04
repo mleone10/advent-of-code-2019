@@ -5,8 +5,13 @@ import (
 	"strconv"
 )
 
+// MappingFunc represents a function used to determine which character Print should use for a given integer in the grid.
+type MappingFunc func(int) string
+
 // Grid represents a two dimensional array of integers.
 type Grid struct {
+	// Mapper is a MappingFunc used by Print to convert grid values into more readable characters.  It defaults to just printing the integer.
+	Mapper                 MappingFunc
 	field                  map[Coordinate]int
 	minX, minY, maxX, maxY int
 }
@@ -14,6 +19,10 @@ type Grid struct {
 // Coordinate represents a two-dimensional (x,y) position on the grid.
 type Coordinate struct {
 	X, Y int
+}
+
+func defaultMappingFunc(i int) string {
+	return strconv.Itoa(i)
 }
 
 // Set stores integer i at location (x, y)
@@ -39,8 +48,12 @@ func (g Grid) Len() int {
 	return len(g.field)
 }
 
-// Print displays the entire grid to STDOUT
+// Print displays the entire grid to STDOUT using the grid's designated MapperFunc
 func (g Grid) Print() {
+	if g.Mapper == nil {
+		g.Mapper = defaultMappingFunc
+	}
+
 	output := [][]string{}
 	h, w := g.maxY-g.minY, g.maxX-g.minX
 
@@ -53,7 +66,7 @@ func (g Grid) Print() {
 	}
 
 	for l, c := range g.field {
-		output[l.Y+Abs(g.minY)][l.X+Abs(g.minX)] = strconv.Itoa(c)
+		output[l.Y+Abs(g.minY)][l.X+Abs(g.minX)] = g.Mapper(c)
 	}
 
 	for i := range output {
