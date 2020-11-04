@@ -30,17 +30,15 @@ func main() {
 		init = append(init, i)
 	}
 
-	grid := run(init, 0)
+	p, in, out := aoc.NewProgram(init)
+	go p.Run()
+
+	grid := interact(in, out, 0)
 	log.Printf("Total panels painted at least once: %d", grid.Len())
 
-	run(init, 1).Print()
-}
-
-func run(prog []int, initColor int) aoc.Grid {
-	p, in, out := aoc.NewProgram(prog)
-
+	out = p.Reset()
 	go p.Run()
-	return interact(in, out, initColor)
+	interact(in, out, 1).Print()
 }
 
 func interact(in chan<- int, out <-chan int, initColor int) aoc.Grid {

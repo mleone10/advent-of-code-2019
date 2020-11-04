@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-// Program represents an initialized, running Intcode program
+// Program represents an initialized Intcode program.
 type Program struct {
 	init, state map[int]int
 	pc, op, ro  int
@@ -18,11 +18,11 @@ type operation struct {
 	modes [3]bool
 }
 
-// NewProgram constructs a Program with the given initial state and input/output channels
+// NewProgram accepts an initial state and returns a ready-to-run Program, as well as input and output channels for the caller to utilize.
 func NewProgram(i []int) (*Program, chan<- int, <-chan int) {
 	init, state := map[int]int{}, map[int]int{}
 	in := make(chan int, 1)
-	out := make(chan int, 50)
+	out := newOutChannel()
 
 	for i, v := range i {
 		state[i] = v
@@ -39,16 +39,25 @@ func NewProgram(i []int) (*Program, chan<- int, <-chan int) {
 	return &p, in, out
 }
 
-// Reset returns the program to its initial state
-func (p *Program) Reset() {
+// Reset returns the program to its initial state.  Since a correctly exited program stops by closing the output channel, this method creates a new one and returns it to the caller.
+func (p *Program) Reset() <-chan int {
 	state := map[int]int{}
 	for i, v := range p.init {
 		state[i] = v
 	}
+	<-p.Input
+	out := newOutChannel()
 	p.pc, p.op, p.ro = 0, 0, 0
+	p.Output = out
+
+	return out
 }
 
-// Run executes an Intcode program until a halt operation is encountered
+func newOutChannel() chan int {
+	return make(chan int, 50)
+}
+
+// Run executes an Intcode program until a halt operation is encountered.
 func (p *Program) Run() {
 	for {
 		i := p.state[p.pc]

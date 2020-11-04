@@ -18,10 +18,7 @@ func TestBoost(t *testing.T) {
 		init = append(init, i)
 	}
 
-	in := make(chan int)
-	out := make(chan int, 1)
-
-	p := aoc.NewProgram(init, in, out)
+	p, in, out := aoc.NewProgram(init)
 	go p.Run()
 	in <- 1
 
@@ -33,10 +30,7 @@ func TestBoost(t *testing.T) {
 }
 
 func TestInOut(t *testing.T) {
-	in := make(chan int)
-	out := make(chan int)
-
-	p := aoc.NewProgram([]int{3, 3, 104, -1, 99}, in, out)
+	p, in, out := aoc.NewProgram([]int{3, 3, 104, -1, 99})
 
 	want := 12345
 
@@ -50,10 +44,7 @@ func TestInOut(t *testing.T) {
 }
 
 func TestRelativeOffset(t *testing.T) {
-	in := make(chan int)
-	out := make(chan int)
-
-	p := aoc.NewProgram([]int{109, -2, 204, 7, 99, 111}, in, out)
+	p, _, out := aoc.NewProgram([]int{109, -2, 204, 7, 99, 111})
 
 	go p.Run()
 
@@ -66,13 +57,10 @@ func TestRelativeOffset(t *testing.T) {
 }
 
 func TestBigMemory(t *testing.T) {
-	in := make(chan int)
-	out := make(chan int, 20)
-
 	got := []int{}
 	want := []int{109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99}
 
-	p := aoc.NewProgram([]int{109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99}, in, out)
+	p, _, out := aoc.NewProgram([]int{109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99})
 
 	go p.Run()
 
@@ -92,11 +80,9 @@ func TestBigMemory(t *testing.T) {
 }
 
 func TestBigValues(t *testing.T) {
-	in := make(chan int)
-	out := make(chan int, 1)
 	want := 1219070632396864
 
-	p := aoc.NewProgram([]int{1102, 34915192, 34915192, 7, 4, 7, 99, 0}, in, out)
+	p, _, out := aoc.NewProgram([]int{1102, 34915192, 34915192, 7, 4, 7, 99, 0})
 
 	go p.Run()
 
