@@ -36,7 +36,7 @@ func main() {
 	grid := interact(in, out, 0)
 	log.Printf("Total panels painted at least once: %d", grid.Len())
 
-	out = p.Reset()
+	in, out = p.Reset()
 	go p.Run()
 	interact(in, out, 1).Print()
 }

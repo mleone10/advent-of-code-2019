@@ -21,8 +21,7 @@ type operation struct {
 // NewProgram accepts an initial state and returns a ready-to-run Program, as well as input and output channels for the caller to utilize.
 func NewProgram(i []int) (*Program, chan<- int, <-chan int) {
 	init, state := map[int]int{}, map[int]int{}
-	in := make(chan int, 1)
-	out := newOutChannel()
+	in, out := newInChan(), newOutChan()
 
 	for i, v := range i {
 		state[i] = v
@@ -39,21 +38,32 @@ func NewProgram(i []int) (*Program, chan<- int, <-chan int) {
 	return &p, in, out
 }
 
-// Reset returns the program to its initial state.  Since a correctly exited program stops by closing the output channel, this method creates a new one and returns it to the caller.
-func (p *Program) Reset() <-chan int {
+// Reset returns the program to its initial state.  Since a correctly exited program stops by closing the output channel, and since unread inputs may exist, this method creates and returns new input/output channels.
+func (p *Program) Reset() (chan<- int, <-chan int) {
 	state := map[int]int{}
 	for i, v := range p.init {
 		state[i] = v
 	}
-	<-p.Input
-	out := newOutChannel()
+
 	p.pc, p.op, p.ro = 0, 0, 0
+
+	in, out := newInChan(), newOutChan()
+	p.Input = in
 	p.Output = out
 
-	return out
+	return in, out
 }
 
-func newOutChannel() chan int {
+// Set stores integer i at state address n
+func (p *Program) Set(n, i int) {
+	p.state[n] = 2
+}
+
+func newInChan() chan int {
+	return make(chan int, 1)
+}
+
+func newOutChan() chan int {
 	return make(chan int, 50)
 }
 

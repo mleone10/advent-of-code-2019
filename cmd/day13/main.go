@@ -29,14 +29,15 @@ func main() {
 		init = append(init, i)
 	}
 
-	run(init)
-}
-
-func run(prog []int) {
-	p, in, out := aoc.NewProgram(prog)
+	p, in, out := aoc.NewProgram(init)
 
 	go p.Run()
 	log.Printf("Blocks on screen at start of game: %d", getInitialBlocks(in, out))
+
+	in, out = p.Reset()
+	p.Set(0, 2)
+	go p.Run()
+	log.Printf("Score at game conclusion: %d", playGame(in, out))
 }
 
 func getInitialBlocks(in chan<- int, out <-chan int) int {
@@ -48,4 +49,8 @@ func getInitialBlocks(in chan<- int, out <-chan int) int {
 		}
 	}
 	return count
+}
+
+func playGame(in chan<- int, out <-chan int) int {
+	return 0
 }
