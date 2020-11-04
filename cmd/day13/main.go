@@ -33,9 +33,7 @@ func main() {
 }
 
 func run(prog []int) {
-	in := make(chan int, 1)
-	out := make(chan int, 2)
-	p := aoc.NewProgram(prog, in, out)
+	p, in, out := aoc.NewProgram(prog)
 
 	go p.Run()
 	log.Printf("Blocks on screen at start of game: %d", getInitialBlocks(in, out))

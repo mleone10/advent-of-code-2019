@@ -37,9 +37,7 @@ func main() {
 }
 
 func run(prog []int, initColor int) aoc.Grid {
-	in := make(chan int, 1)
-	out := make(chan int)
-	p := aoc.NewProgram(prog, in, out)
+	p, in, out := aoc.NewProgram(prog)
 
 	go p.Run()
 	return interact(in, out, initColor)

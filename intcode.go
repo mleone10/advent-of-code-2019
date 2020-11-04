@@ -7,10 +7,10 @@ import (
 
 // Program represents an initialized, running Intcode program
 type Program struct {
-	state      map[int]int
-	pc, op, ro int
-	Input      <-chan int
-	Output     chan<- int
+	init, state map[int]int
+	pc, op, ro  int
+	Input       <-chan int
+	Output      chan<- int
 }
 
 type operation struct {
@@ -18,18 +18,34 @@ type operation struct {
 	modes [3]bool
 }
 
-// NewProgram constructs a Program with the given initial state and input, output, and halt channels
-func NewProgram(init []int, in <-chan int, out chan<- int) *Program {
-	state := map[int]int{}
-	for i, v := range init {
+// NewProgram constructs a Program with the given initial state and input/output channels
+func NewProgram(i []int) (*Program, chan<- int, <-chan int) {
+	init, state := map[int]int{}, map[int]int{}
+	in := make(chan int, 1)
+	out := make(chan int, 50)
+
+	for i, v := range i {
 		state[i] = v
+		init[i] = v
 	}
 
-	return &Program{
+	p := Program{
+		init:   init,
 		state:  state,
 		Input:  in,
 		Output: out,
 	}
+
+	return &p, in, out
+}
+
+// Reset returns the program to its initial state
+func (p *Program) Reset() {
+	state := map[int]int{}
+	for i, v := range p.init {
+		state[i] = v
+	}
+	p.pc, p.op, p.ro = 0, 0, 0
 }
 
 // Run executes an Intcode program until a halt operation is encountered
