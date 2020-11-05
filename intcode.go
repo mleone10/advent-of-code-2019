@@ -60,7 +60,7 @@ func (p *Program) Set(n, i int) {
 }
 
 func newInChan() chan int {
-	return make(chan int, 1)
+	return make(chan int)
 }
 
 func newOutChan() chan int {

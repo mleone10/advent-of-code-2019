@@ -16,6 +16,9 @@ const (
 	tileBlock
 	tilePaddle
 	tileBall
+)
+
+const (
 	moveLeft = iota - 1
 	moveNeutral
 	moveRight
@@ -55,34 +58,51 @@ func getInitialBlocks(in chan<- int, out <-chan int) int {
 }
 
 func playGame(in chan<- int, out <-chan int) int {
-	var x, y, t, score int
+	var x, y, t, move, numOuts, score int
 	var grid aoc.Grid
-	var tileLoc, ballLoc aoc.Coordinate
+	var paddleLoc, ballLoc aoc.Coordinate
 
-	for x = range out {
-		y, t = <-out, <-out
+	displayMap := map[int]string{0: " ", 1: "+", 2: "#", 3: "_", 4: "O"}
+	grid.Mapper = func(i int) string { return displayMap[i] }
 
-		if x == -1 && y == 0 && t > 4 {
-			score = t
-		} else {
-			grid.Set(x, y, t)
-		}
+	for {
+		select {
+		case o, ok := <-out:
+			if !ok {
+				return score
+			}
+			numOuts++
+			if numOuts == 1 {
+				x = o
+			} else if numOuts == 2 {
+				y = o
+			} else if numOuts == 3 {
+				t = o
+				numOuts = 0
 
-		switch t {
-		case tilePaddle:
-			tileLoc.X, tileLoc.Y = x, y
-		case tileBlock:
-			ballLoc.X, ballLoc.Y = x, y
-		}
+				if x == -1 && y == 0 {
+					score = t
+				} else {
+					grid.Set(x, y, t)
+				}
 
-		if ballLoc.Y > tileLoc.Y {
-			in <- moveRight
-		} else if ballLoc.Y < tileLoc.Y {
-			in <- moveLeft
-		} else {
-			in <- moveNeutral
+				switch t {
+				case tilePaddle:
+					paddleLoc.X, paddleLoc.Y = x, y
+				case tileBall:
+					ballLoc.X, ballLoc.Y = x, y
+				}
+
+				if ballLoc.Y > paddleLoc.Y {
+					move = moveRight
+				} else if ballLoc.Y < paddleLoc.Y {
+					move = moveLeft
+				} else {
+					move = moveNeutral
+				}
+			}
+		case in <- move:
+			grid.Print()
 		}
 	}
-
-	return score
 }

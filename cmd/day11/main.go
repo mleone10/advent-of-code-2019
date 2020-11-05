@@ -44,43 +44,79 @@ func main() {
 func interact(in chan<- int, out <-chan int, initColor int) aoc.Grid {
 	var grid aoc.Grid
 	var dir direction
-	var x, y int
+	var x, y, numOuts, paintColor int
 
 	grid.Mapper = mappingFunc
 	grid.Set(0, 0, initColor)
 	in <- initColor
 
-	for color := range out {
-		grid.Set(x, y, color)
+	for {
+		select {
+		case o, ok := <-out:
+			if !ok {
+				return grid
+			}
+			numOuts++
+			if numOuts == 1 {
+				grid.Set(x, y, o)
+			} else if numOuts == 2 {
+				numOuts = 0
+				if o == 0 {
+					dir = (dir + 3) % 4
+				} else {
+					dir = (dir + 5) % 4
+				}
 
-		rotation := <-out
-		if rotation == 0 {
-			dir = (dir + 3) % 4
-		} else {
-			dir = (dir + 5) % 4
-		}
+				switch dir {
+				case dirUp:
+					y--
+				case dirRight:
+					x++
+				case dirDown:
+					y++
+				case dirLeft:
+					x--
+				}
 
-		switch dir {
-		case dirUp:
-			y--
-		case dirRight:
-			x++
-		case dirDown:
-			y++
-		case dirLeft:
-			x--
-		default:
-			log.Fatalf("Encountered unsupported direction %d", dir)
-		}
-
-		if grid.Get(x, y) == 0 {
-			in <- 0
-		} else {
-			in <- 1
+				if grid.Get(x, y) == 0 {
+					paintColor = 0
+				} else {
+					paintColor = 1
+				}
+			}
+		case in <- paintColor:
 		}
 	}
 
-	return grid
+	// for color := range out {
+	// 	grid.Set(x, y, color)
+
+	// 	rotation := <-out
+	// 	if rotation == 0 {
+	// 		dir = (dir + 3) % 4
+	// 	} else {
+	// 		dir = (dir + 5) % 4
+	// 	}
+
+	// 	switch dir {
+	// 	case dirUp:
+	// 		y--
+	// 	case dirRight:
+	// 		x++
+	// 	case dirDown:
+	// 		y++
+	// 	case dirLeft:
+	// 		x--
+	// 	default:
+	// 		log.Fatalf("Encountered unsupported direction %d", dir)
+	// 	}
+
+	// 	if grid.Get(x, y) == 0 {
+	// 		in <- 0
+	// 	} else {
+	// 		in <- 1
+	// 	}
+	// }
 }
 
 func mappingFunc(i int) string {
