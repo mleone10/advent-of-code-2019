@@ -64,83 +64,91 @@ func newInChan() chan int {
 }
 
 func newOutChan() chan int {
-	return make(chan int, 50)
+	return make(chan int, 1)
 }
 
 // Run executes an Intcode program until a halt operation is encountered.
 func (p *Program) Run() {
-	for {
-		i := p.state[p.pc]
-		op := i % 100
-
-		switch op {
-		case 1:
-			// Add
-			a, b, c := p.getParam(1), p.getParam(2), p.state[p.pc+3]
-			p.putParam(3, c, a+b)
-			p.pc += 4
-		case 2:
-			// Multiply
-			a, b, c := p.getParam(1), p.getParam(2), p.state[p.pc+3]
-			p.putParam(3, c, a*b)
-			p.pc += 4
-		case 3:
-			// Input
-			a := p.state[p.pc+1]
-			p.putParam(1, a, <-p.Input)
-			p.pc += 2
-		case 4:
-			// Output
-			a := p.getParam(1)
-			p.Output <- a
-			p.pc += 2
-		case 5:
-			// Jump if true
-			a, b := p.getParam(1), p.getParam(2)
-			if a != 0 {
-				p.pc = b
-			} else {
-				p.pc += 3
-			}
-		case 6:
-			// Jump if false
-			a, b := p.getParam(1), p.getParam(2)
-			if a == 0 {
-				p.pc = b
-			} else {
-				p.pc += 3
-			}
-		case 7:
-			// Less than
-			a, b, c := p.getParam(1), p.getParam(2), p.state[p.pc+3]
-			if a < b {
-				p.putParam(3, c, 1)
-			} else {
-				p.putParam(3, c, 0)
-			}
-			p.pc += 4
-		case 8:
-			// Equals
-			a, b, c := p.getParam(1), p.getParam(2), p.state[p.pc+3]
-			if a == b {
-				p.putParam(3, c, 1)
-			} else {
-				p.putParam(3, c, 0)
-			}
-			p.pc += 4
-		case 9:
-			// Relative offset
-			a := p.getParam(1)
-			p.ro += a
-			p.pc += 2
-		case 99:
-			// Halt
-			close(p.Output)
-			return
-		default:
-			log.Fatalf("encountered unknown opcode; %+v", p)
-		}
+	var done bool
+	for !done {
+		done = p.Step()
 	}
+}
+
+// Step executes a single instruction and returns true if the halt signal was encountered.
+func (p *Program) Step() bool {
+	i := p.state[p.pc]
+	op := i % 100
+
+	switch op {
+	case 1:
+		// Add
+		a, b, c := p.getParam(1), p.getParam(2), p.state[p.pc+3]
+		p.putParam(3, c, a+b)
+		p.pc += 4
+	case 2:
+		// Multiply
+		a, b, c := p.getParam(1), p.getParam(2), p.state[p.pc+3]
+		p.putParam(3, c, a*b)
+		p.pc += 4
+	case 3:
+		// Input
+		a := p.state[p.pc+1]
+		p.putParam(1, a, <-p.Input)
+		p.pc += 2
+	case 4:
+		// Output
+		a := p.getParam(1)
+		p.Output <- a
+		p.pc += 2
+	case 5:
+		// Jump if true
+		a, b := p.getParam(1), p.getParam(2)
+		if a != 0 {
+			p.pc = b
+		} else {
+			p.pc += 3
+		}
+	case 6:
+		// Jump if false
+		a, b := p.getParam(1), p.getParam(2)
+		if a == 0 {
+			p.pc = b
+		} else {
+			p.pc += 3
+		}
+	case 7:
+		// Less than
+		a, b, c := p.getParam(1), p.getParam(2), p.state[p.pc+3]
+		if a < b {
+			p.putParam(3, c, 1)
+		} else {
+			p.putParam(3, c, 0)
+		}
+		p.pc += 4
+	case 8:
+		// Equals
+		a, b, c := p.getParam(1), p.getParam(2), p.state[p.pc+3]
+		if a == b {
+			p.putParam(3, c, 1)
+		} else {
+			p.putParam(3, c, 0)
+		}
+		p.pc += 4
+	case 9:
+		// Relative offset
+		a := p.getParam(1)
+		p.ro += a
+		p.pc += 2
+	case 99:
+		// Halt
+		close(p.Output)
+		return true
+	default:
+		log.Fatalf("encountered unknown opcode; %+v", p)
+	}
+
+	return false
 }
 
 func (p *Program) getParam(o int) int {
