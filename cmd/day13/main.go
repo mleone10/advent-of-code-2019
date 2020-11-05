@@ -62,9 +62,6 @@ func playGame(in chan<- int, out <-chan int) int {
 	var grid aoc.Grid
 	var paddleLoc, ballLoc aoc.Coordinate
 
-	displayMap := map[int]string{0: " ", 1: "+", 2: "#", 3: "_", 4: "O"}
-	grid.Mapper = func(i int) string { return displayMap[i] }
-
 	for {
 		select {
 		case o, ok := <-out:
@@ -93,16 +90,15 @@ func playGame(in chan<- int, out <-chan int) int {
 					ballLoc.X, ballLoc.Y = x, y
 				}
 
-				if ballLoc.Y > paddleLoc.Y {
+				if ballLoc.X > paddleLoc.X {
 					move = moveRight
-				} else if ballLoc.Y < paddleLoc.Y {
+				} else if ballLoc.X < paddleLoc.X {
 					move = moveLeft
 				} else {
 					move = moveNeutral
 				}
 			}
 		case in <- move:
-			grid.Print()
 		}
 	}
 }
