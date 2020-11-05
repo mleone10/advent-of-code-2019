@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"log"
+	"os"
+	"strconv"
+	"strings"
 
 	aoc "github.com/mleone10/advent-of-code-2019"
 )
@@ -22,21 +26,27 @@ type requirements map[string]int
 func main() {
 	cs := make(chemicals)
 
-	// TODO: Populate chemicals map programatically
-	cs["A"] = chemical{yield: 10, components: requirements{"ORE": 10}}
-	cs["B"] = chemical{yield: 1, components: requirements{"ORE": 1}}
-	cs["C"] = chemical{yield: 1, components: requirements{"A": 7, "B": 1}}
-	cs["D"] = chemical{yield: 1, components: requirements{"A": 7, "C": 1}}
-	cs["E"] = chemical{yield: 1, components: requirements{"A": 7, "D": 1}}
-	cs["FUEL"] = chemical{yield: 1, components: requirements{"A": 7, "E": 1}}
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		l := strings.Split(scanner.Text(), " => ")
+		rs := make(requirements)
+		for _, r := range strings.Split(l[0], ",") {
+			ps := strings.Split(strings.TrimSpace(r), " ")
+			y, _ := strconv.Atoi(ps[0])
+			rs[ps[1]] = y
+		}
+		p := strings.Split(strings.TrimSpace(l[1]), " ")
+		y, _ := strconv.Atoi(p[0])
+		cs[p[1]] = chemical{yield: y, components: rs}
+	}
 
+	log.Printf("%+v", cs)
 	log.Printf("Ore required for 1 fuel: %d", cs.calculateOre(cs.simplify(fuel, 1)))
 }
 
 func (cs chemicals) simplify(c string, y int) requirements {
 	for k := range cs[c].components {
 		if k == ore {
-			log.Println("Basic", c, y)
 			return requirements{c: y}
 		}
 	}
