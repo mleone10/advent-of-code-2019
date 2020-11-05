@@ -43,3 +43,7 @@ func Gcd(x, y int) int {
 	}
 	return x
 }
+
+func Ceil(x float64) int {
+	return int(math.Ceil(x))
+}
