@@ -40,32 +40,31 @@ func main() {
 		cs[p[1]] = chemical{yield: y, components: rs}
 	}
 
-	log.Printf("%+v", cs)
-	log.Printf("Ore required for 1 fuel: %d", cs.calculateOre(cs.simplify(fuel, 1)))
+	log.Printf("Ore required for 1 fuel: %d", cs.simplify(fuel, 1, make(requirements)))
 }
 
-func (cs chemicals) simplify(c string, y int) requirements {
-	for k := range cs[c].components {
-		if k == ore {
-			return requirements{c: y}
-		}
+func (cs chemicals) simplify(c string, y int, r requirements) int {
+	if c == ore {
+		return y
 	}
 
-	reqs := make(requirements)
-	for k := range cs[c].components {
-		s := cs.simplify(k, y*cs[c].components[k])
-		for k, a := range s {
-			reqs[k] += a
-		}
+	if r[c] >= y {
+		r[c] -= y
+		return 0
 	}
 
-	return reqs
-}
-
-func (cs chemicals) calculateOre(rs requirements) int {
-	var sum int
-	for k := range rs {
-		sum += aoc.Ceil(float64(rs[k])/float64(cs[k].yield)) * cs[k].yield
+	if r[c] > 0 {
+		y -= r[c]
+		r[c] = 0
 	}
-	return sum
+
+	batches := aoc.Ceil(float64(y) / float64(cs[c].yield))
+	oreSum := 0
+	for k, amt := range cs[c].components {
+		oreSum += cs.simplify(k, amt*batches, r)
+	}
+
+	r[c] += (batches * cs[c].yield) - y
+
+	return oreSum
 }

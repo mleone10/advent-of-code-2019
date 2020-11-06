@@ -4,7 +4,7 @@ clean:
 	rm -rf ./bin
 
 test:
-	go test
+	go test ./...
 
 build: clean test
 	for d in $(DAYS); do \
