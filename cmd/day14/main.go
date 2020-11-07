@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -41,6 +42,7 @@ func main() {
 	}
 
 	log.Printf("Ore required for 1 fuel: %d", cs.simplify(fuel, 1, make(requirements)))
+	log.Printf("Fuel produced from 1 trillion ore: %d", cs.maxFuel(1000000000000))
 }
 
 func (cs chemicals) simplify(c string, y int, r requirements) int {
@@ -67,4 +69,10 @@ func (cs chemicals) simplify(c string, y int, r requirements) int {
 	r[c] += (batches * cs[c].yield) - y
 
 	return oreSum
+}
+
+func (cs chemicals) maxFuel(oreMax int) int {
+	return sort.Search(oreMax, func(i int) bool {
+		return cs.simplify(fuel, i+1, make(requirements)) > oreMax
+	})
 }
