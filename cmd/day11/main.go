@@ -87,36 +87,6 @@ func interact(in chan<- int, out <-chan int, initColor int) aoc.Grid {
 		case in <- paintColor:
 		}
 	}
-
-	// for color := range out {
-	// 	grid.Set(x, y, color)
-
-	// 	rotation := <-out
-	// 	if rotation == 0 {
-	// 		dir = (dir + 3) % 4
-	// 	} else {
-	// 		dir = (dir + 5) % 4
-	// 	}
-
-	// 	switch dir {
-	// 	case dirUp:
-	// 		y--
-	// 	case dirRight:
-	// 		x++
-	// 	case dirDown:
-	// 		y++
-	// 	case dirLeft:
-	// 		x--
-	// 	default:
-	// 		log.Fatalf("Encountered unsupported direction %d", dir)
-	// 	}
-
-	// 	if grid.Get(x, y) == 0 {
-	// 		in <- 0
-	// 	} else {
-	// 		in <- 1
-	// 	}
-	// }
 }
 
 func mappingFunc(i int) string {

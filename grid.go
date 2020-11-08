@@ -38,9 +38,19 @@ func (g *Grid) Set(x, y, i int) {
 	g.maxY = Max(g.maxY, y)
 }
 
+// SetCoord is a convenience method which uses a given Coordinate's (x, y) location to call Set
+func (g *Grid) SetCoord(c Coordinate, i int) {
+	g.Set(c.X, c.Y, i)
+}
+
 // Get retrieves the value located at (x, y)
 func (g Grid) Get(x, y int) int {
 	return g.field[Coordinate{x, y}]
+}
+
+// GetCoord is a convenience method which uses a given Coordinate's (x, y) location to call Get
+func (g Grid) GetCoord(c Coordinate) int {
+	return g.Get(c.X, c.Y)
 }
 
 // Len returns the total number of locations stored in the grid
@@ -74,5 +84,21 @@ func (g Grid) Print() {
 			fmt.Print(output[i][j])
 		}
 		fmt.Print("\n")
+	}
+}
+
+// PlusCoord adds two Coordinates together and returns the result.
+func PlusCoord(r, s Coordinate) Coordinate {
+	return Coordinate{
+		X: r.X + s.X,
+		Y: r.Y + s.Y,
+	}
+}
+
+// MinusCoord subtracts Coordinate r from s and returns the result.
+func MinusCoord(r, s Coordinate) Coordinate {
+	return Coordinate{
+		X: r.X - s.X,
+		Y: r.Y - s.Y,
 	}
 }
